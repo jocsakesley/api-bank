@@ -2,13 +2,102 @@ const pool = require('../settings').pool
 const bcrypt = require('bcrypt');
 
 class UserRepository {
-    getAllUsers(req, resp) {
-        pool.query("SELECT * FROM users ORDER BY id ASC", (error, results) => {
-            if (error) {
-                throw error
-            }
-            resp.status(200).json(results.rows)
-        })
+
+    queryBalance(user_id, account_id) {
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT a.agency, a.number, a.balance FROM users u INNER JOIN accounts a ON u.id = a.id_user WHERE u.id = $1 AND a.id = $2",[user_id, account_id], (error, results) => {
+              if (error) {
+                reject({
+                  status: 400,
+                  message: error.detail
+                })
+              } else {
+                resolve({
+                  status: 200, 
+                  message: results.rows[0]  
+                })
+              }
+            })
+          })
+    }
+
+    userUpdateBalance(user_id, account_id, newBalance) {
+        return new Promise((resolve, reject) => {
+            pool.query('UPDATE accounts SET balance = $1 WHERE id_user = $2 AND id = $3',
+            [newBalance, user_id, account_id], (error, results) => {
+              if (error) {
+                reject({
+                  status: 400,
+                  message: error.detail
+                })
+              } else {
+                resolve({
+                  status: 200, 
+                  message: results.rows  
+                })
+              }
+            })
+          })
+    }
+
+    userUpdateBalanceByAccount(agency, number, newBalance) {
+        return new Promise((resolve, reject) => {
+            pool.query('UPDATE accounts SET balance = balance + $1 WHERE agency = $2 AND number = $3',
+            [newBalance, agency, number], (error, results) => {
+              if (error) {
+                reject({
+                  status: 400,
+                  message: error.detail
+                })
+              } else {
+                resolve({
+                  status: 200, 
+                  message: results.rows  
+                })
+              }
+            })
+          })
+    }
+
+
+    userWithdraw(req) {
+        const account_id = parseInt(req.params.account_id)
+        const user_id = parseInt(req.params.user_id)
+        let { value } = req.body;
+        return new Promise((resolve, reject) => {
+            pool.query("SELECT a.agency, a.number, a.balance FROM users u INNER JOIN accounts a ON u.id = a.id_user WHERE u.id = $1",[id], (error, results) => {
+              if (error) {
+                reject({
+                  status: 400,
+                  message: error.detail
+                })
+              } else {
+                resolve({
+                  status: 200, 
+                  message: results.rows  
+                })
+              }
+            })
+          })
+
+    }
+
+    getAllUsers() {
+        return new Promise((resolve, reject) => {
+            pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
+              if (error) {
+                reject({
+                  status: 400,
+                  message: error.detail
+                })
+              } else {
+                resolve({
+                  status: 200, 
+                  message: results.rows  
+                })
+              }
+            })
+          })
     }
 
     getOneUser(req, resp) {

@@ -1,13 +1,15 @@
 
 class User {
     saldo = 0
-    constructor(name, email, cpf) {
+    constructor(name, email, account) {
         this.name = name;
         this.email = email
-        this.cpf = cpf
+        this.senha = senha
+        this.account = account
+
     }
 
-    consultar() {
+    query() {
         console.log(`Saldo atual R$${this.saldo}`)
     }
 
